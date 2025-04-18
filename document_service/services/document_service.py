@@ -8,7 +8,7 @@ from document_service.schemas.document import (
     DocumentResponse,
     ManyDocumentsResponse, TinyDocumentResponse,
 )
-import PyPDF2
+from document_service.utils.pdf_extractor import extract_pdf_content
 
 
 from document_service.tasks.ai_tasks import AIRemoteDocumentAnalyzer
@@ -65,11 +65,6 @@ class DocumentService:
 
     def _get_document_text(self, file_content: bytes, file_format: str):
         if file_format == 'pdf':
-            with BytesIO(file_content) as pdf_file:  # noqa
-                read_pdf = PyPDF2.PdfReader(pdf_file)
-                full_text = ""
-                for page in read_pdf.pages:
-                    full_text += page.extract_text()
-            return full_text
+            return extract_pdf_content(file_content)
 
         raise NotImplementedError
