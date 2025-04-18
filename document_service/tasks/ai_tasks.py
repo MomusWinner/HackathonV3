@@ -8,11 +8,8 @@ from dishka import Provider, Scope, make_async_container, provide
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
 
 from document_service.config import load_config
-from document_service.repositories.document_repository import DocumentRepository
-import pandas as pd
 from catboost import CatBoostClassifier
 
-from document_service.services.ai_service import predict
 from document_service.utils.metrics import TOTAL_MESSAGES_PRODUCED
 
 cfg = load_config(os.getenv('DOCUMENT_SERVICE_CONFIG_PATH', './configs/app.toml'))
@@ -50,7 +47,7 @@ def run_async(coro):
 
 
 @celery_app.task
-def process_document_analysis(document_id: UUID):
+def process_document_analysis(document_id: UUID, document_text: str):
     async def inner():
         pass
     return run_async(inner())
@@ -58,6 +55,6 @@ def process_document_analysis(document_id: UUID):
 
 # Celery forces doing outer encapsulation
 class AIRemoteDocumentAnalyzer:
-    def analyze(self, document_id: UUID):
-        process_document_analysis.delay(document_id)
+    def analyze(self, document_id: UUID, document_text: str):
+        process_document_analysis.delay(document_id, document_text)
         TOTAL_MESSAGES_PRODUCED.inc()

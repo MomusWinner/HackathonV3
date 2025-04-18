@@ -73,20 +73,6 @@ class DocumentService:
             results=[TinyDocumentResponse.model_validate(doc) for doc in documents],
         )
 
-    async def get_categories_data(self, user_id: UUID):
-        documents, total = await self.repository.get_all(
-            user_id=user_id,
-            limit=10_000_000
-        )
-        res = {}
-        for ts in documents:
-            if not res.get(ts.category):
-                res[ts.category] = 1
-            else:
-                res[ts.category] += 1
-
-        return res, total
-
 
     def _parse_account_stmt(self, pdf_content: bytes, user_id: UUID, format: str):
         if format == 'pdf':
