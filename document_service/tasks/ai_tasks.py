@@ -8,7 +8,6 @@ from dishka import Provider, Scope, make_async_container, provide
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
 
 from document_service.config import load_config
-from catboost import CatBoostClassifier
 
 from document_service.utils.metrics import TOTAL_MESSAGES_PRODUCED
 
@@ -32,10 +31,6 @@ class DatabaseProvider(Provider):
     ) -> AsyncGenerator[AsyncSession, None, None]:
         async with sessionmaker() as session:
             yield session
-
-    @provide(scope=Scope.APP)
-    async def get_model(self) -> CatBoostClassifier:
-        return CatBoostClassifier().load_model('model.cbm')
 
 
 container = make_async_container(DatabaseProvider())
