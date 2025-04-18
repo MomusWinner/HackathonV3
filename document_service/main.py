@@ -4,6 +4,7 @@ from typing import AsyncGenerator
 from dishka import AsyncContainer
 from dishka.integrations.fastapi import setup_dishka
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from starlette.responses import HTMLResponse
 from starlette.staticfiles import StaticFiles
@@ -34,6 +35,19 @@ def create_app(ioc_container: AsyncContainer):
 
     application.include_router(documents_router, prefix="/api/v1")
     application.include_router(metrics_router)
+    origins = [
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://localhost:8000",
+    ]
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
     @application.get("/health")
     async def health_check():
