@@ -3,7 +3,11 @@
 		<div class="bg-red-200 basis-1/4">
 			<DocumentList />
 		</div>
-		<div class="bg-red-100 basis-2/4">< /></div>
-		<div class="bg-red-200 basis-1/4">< /></div>
+		<div class="basis-2/4">
+            <CenterUploader />
+        </div>
+		<div class="basis-1/4">
+            <SettingForm />
+        </div>
 	</div>
 </template>
