@@ -9,7 +9,7 @@ from document_service.repositories.document_repository import DocumentRepository
 from document_service.schemas.document import (
     DocumentCreate,
     DocumentResponse,
-    ManyDocumentsResponse,
+    ManyDocumentsResponse, TinyDocumentResponse,
 )
 import PyPDF2
 import re
@@ -19,7 +19,7 @@ from document_service.tasks.ai_tasks import AIRemoteDocumentAnalyzer
 
 
 class DocumentService:
-    def __init__(self, repository: DocumentRepository, financial_category_analyzer: AIRemotedocumentAnalyzer):
+    def __init__(self, repository: DocumentRepository, financial_category_analyzer: AIRemoteDocumentAnalyzer):
         self.repository = repository
         self.financial_category_analyzer = financial_category_analyzer
 
@@ -31,7 +31,7 @@ class DocumentService:
 
         return DocumentResponse.model_validate(new_document)
 
-    async def get_document(self, document_id: UUID) -> Optional[documentResponse]:
+    async def get_document(self, document_id: UUID) -> Optional[DocumentResponse]:
         document = await self.repository.get(document_id)
         if not document:
             return None
@@ -42,14 +42,14 @@ class DocumentService:
         user_id: UUID,
         pdf_file: bytes,
         bank: Optional[str] = 'tbank',
-    ) -> ManydocumentsResponse:
+    ) -> ManyDocumentsResponse:
         dict_documents = self._parse_account_stmt(pdf_file, user_id=user_id, bank=bank)
         await self.repository.create_account_stmt(dict_documents)
 
         for ts in dict_documents:
             self.financial_category_analyzer.analyze(ts['id'])
 
-        return ManydocumentsResponse(
+        return ManyDocumentsResponse(
             total=len(dict_documents),
             results=reversed(sorted(
                 [DocumentResponse.model_validate(ts) for ts in dict_documents],
@@ -60,22 +60,17 @@ class DocumentService:
     async def get_documents_by_user_id(
         self,
         user_id: UUID,
-        start_date: datetime,
-        end_date: datetime,
         limit: int,
         offset: int,
-    ) -> ManydocumentsResponse:
+    ) -> ManyDocumentsResponse:
         documents, total = await self.repository.get_all(
             user_id=user_id,
-            start_date=start_date,
-            end_date=end_date,
             skip=offset,
             limit=limit
         )
-
-        return ManydocumentsResponse(
+        return ManyDocumentsResponse(
             total=total,
-            results=[DocumentResponse.model_validate(ts) for ts in documents],
+            results=[TinyDocumentResponse.model_validate(doc) for doc in documents],
         )
 
     async def get_categories_data(self, user_id: UUID):
@@ -93,69 +88,14 @@ class DocumentService:
         return res, total
 
 
-    def _parse_account_stmt(self, pdf_content: bytes, user_id: UUID, bank: str):
-        if bank == 'tbank':
+    def _parse_account_stmt(self, pdf_content: bytes, user_id: UUID, format: str):
+        if format == 'pdf':
             with BytesIO(pdf_content) as pdf_file:  # noqa
                 read_pdf = PyPDF2.PdfReader(pdf_file)
                 full_text = ""
                 for page in read_pdf.pages:
                     full_text += page.extract_text()
-
-            balance_pattern = r'Баланс на (\d{2}\.\d{2}\.\d{2})\s+([\d\s]+\.\d{2})\s*i'
-
-            balances = re.findall(balance_pattern, full_text, re.MULTILINE)
-            # Преобразование в список словарей для удобства
-            balance_list = []
-            for _, amount in balances:
-                amount_float = float(amount.replace(' ', ''))
-                balance_list.append(amount_float)
-
-            balance_on_start, balance_on_end = map(lambda x: Decimal(x), balance_list)
-            print(balance_on_start, balance_on_end)
-
-            # pattern = r'(\d{2}\.\d{2}\.\d{2})*'
-            documents_pattern = r'(\d{2}\.\d{2}\.\d{2})\s*(?:\d{2}:\d{2})?\s+(\d{2}\.\d{2}\.\d{2})\s+([+-]?\s*\d+(?:\s*\d{3})*(?:\.\d+)?\s*i)'
-
-            # Получаем список всех совпадений
-            matches = re.findall(documents_pattern, full_text, re.MULTILINE)
-
-            # matches содержит список кортежей с захваченными группами
-
-            res = []
-            sum_wdraw = 0
-            sum_dep = 0
-            for match in matches:
-                print(match, match[0], match[1])
-                entry_date = self._date_from_str(match[0])
-                receipt_date = self._date_from_str(match[1])
-
-                data = {
-                    'id': uuid.uuid4(),
-                    'entry_date': entry_date,
-                    'receipt_date': receipt_date,
-                    'user_id': user_id,
-                    'withdraw': Decimal(),
-                    'deposit': Decimal(),
-                    'processing_status': 'in_progress',
-                    'category': None,
-                    'expediency': 0,
-                    'created_at': datetime.now(),
-                }
-
-                processed_amount = match[2].replace(' i', '')
-                if "+" in processed_amount:
-                    data['deposit'] = Decimal(processed_amount.replace("+ ", "").replace(" ", ""))
-                else:
-                    data['withdraw'] = Decimal(processed_amount.replace(" ", ""))
-
-                balance_on_start += data['deposit'] - data['withdraw']
-                data['balance'] = balance_on_start
-
-                sum_wdraw += data['deposit']
-                sum_dep += data['withdraw']
-                res.append(data)
-
-            return res
+            return full_text
 
         raise NotImplementedError
 

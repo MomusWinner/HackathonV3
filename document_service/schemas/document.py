@@ -19,19 +19,21 @@ class DocumentResponse(BaseModel):
 
     id: UUID4
     user_id: UUID4
-    entry_date: datetime
-    receipt_date: datetime
-    withdraw: Decimal
-    deposit: Decimal
+    title: str
+    tags: None | list[str]
+    recommendations: str
+    summary: str
     processing_status: str
-    category: str | None
-    balance: Decimal
     created_at: datetime
-    expediency: int | None
 
 
-class ManyDocumentResponse(BaseModel):
+class TinyDocumentResponse(BaseModel):
+    id: UUID4
+    processing_status: str
+
+
+class ManyDocumentsResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     total: int
-    results: list[DocumentResponse]
+    results: list[TinyDocumentResponse]

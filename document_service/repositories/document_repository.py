@@ -3,7 +3,7 @@ from typing import Optional
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, text, delete, desc
+from sqlalchemy import select, func, text, desc
 
 from document_service.models.document import Document
 from document_service.schemas.document import DocumentCreate
@@ -29,36 +29,29 @@ class DocumentRepository:
             self.session.add(Document(**ts))
         await self.session.commit()
 
-    async def get(self, transaction_id: UUID) -> Optional[Document]:
+    async def get(self, document_id: UUID) -> Optional[Document]:
         result = await self.session.execute(
-            select(Document).filter(Document.id == transaction_id)
+            select(Document).filter(Document.id == document_id)
         )
         return result.scalars().first()
 
     async def get_all(
             self,
             user_id: UUID,
-            start_date: Optional[datetime] = None,
-            end_date: Optional[datetime] = None,
             skip: int = 0,
             limit: int = 10,
     ) -> tuple[list[Document], int]:
         base_query = select(Document).filter(Document.user_id == user_id)
 
-        if start_date:
-            base_query = base_query.filter(Document.receipt_date >= start_date)
-        if end_date:
-            base_query = base_query.filter(Document.receipt_date <= end_date)
-
-        data_query = base_query.order_by(Document.receipt_date.desc()).offset(skip).limit(limit)
+        data_query = base_query.order_by(Document.id.desc()).offset(skip).limit(limit)
         data_result = await self.session.execute(data_query)
-        transactions = list(data_result.scalars().all())
+        documents = list(data_result.scalars().all())
 
         count_query = select(func.count()).select_from(base_query.subquery())
         count_result = await self.session.execute(count_query)
         total = count_result.scalar()
 
-        return transactions, total
+        return documents, total
 
     # async def get_all_edited(self):
     #     stmt = select(EditedTransaction)
