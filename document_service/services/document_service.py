@@ -35,9 +35,10 @@ class DocumentService:
             new_document.id,
             document_text,
             document.show_tags,
-            document.show_keywords,
+            document.show_topics,
             document.analyze_images,
             document.show_recommendations,
+            document.prompt,
         )
 
         return new_document.id

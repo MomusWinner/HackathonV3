@@ -46,9 +46,10 @@ def process_document_analysis(
         document_id: UUID,
         document_text: str,
         show_tags: bool,
-        show_keywords: bool,
+        show_topics: bool,
         analyze_images: bool,
         show_recommendations: bool,
+        prompt: str,
 ):
     async def inner():
         pass
@@ -62,16 +63,18 @@ class AIRemoteDocumentAnalyzer:
             document_id: UUID,
             document_text: str,
             show_tags: bool,
-            show_keywords: bool,
+            show_topics: bool,
             analyze_images: bool,
-            show_recommendations: bool
+            show_recommendations: bool,
+            prompt: str
     ):
         process_document_analysis.delay(
             document_id,
             document_text,
             show_tags,
-            show_keywords,
+            show_topics,
             analyze_images,
-            show_recommendations
+            show_recommendations,
+            prompt,
         )
         TOTAL_MESSAGES_PRODUCED.inc()

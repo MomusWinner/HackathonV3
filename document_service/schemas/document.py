@@ -9,8 +9,9 @@ class DocumentCreate(BaseModel):
     filename: str
     content: bytes
     show_tags: bool
-    show_keywords: bool
+    show_topics: bool
     analyze_images: bool
+    prompt: str
     show_recommendations: bool
 
 

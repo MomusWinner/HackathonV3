@@ -27,9 +27,10 @@ async def create_documents(
         file: UploadFile,
         user_id: Annotated[str, Form()],
         show_tags: Annotated[bool, Form()],
-        show_keywords: Annotated[bool, Form()],
+        show_topics: Annotated[bool, Form()],
         analyze_images: Annotated[bool, Form()],
         show_recommendations: Annotated[bool, Form()],
+        prompt: Annotated[str, Form()],
         service: FromDishka[DocumentService],
 
 ):
@@ -39,8 +40,9 @@ async def create_documents(
         user_id=user_id,
         filename=file.filename,
         show_tags=show_tags,
-        show_keywords=show_keywords,
+        show_keywords=show_topics,
         analyze_images=analyze_images,
+        prompt=prompt,
         show_recommendations=show_recommendations,
     ))
     return {'url': f"ws://localhost:8000/api/v1/analyzes/{new_document_id}"}
