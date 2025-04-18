@@ -12,7 +12,7 @@ from document_service.repositories.document_repository import DocumentRepository
 import pandas as pd
 from catboost import CatBoostClassifier
 
-from document_service.services.ai_service import predict, fit_model
+from document_service.services.ai_service import predict
 from document_service.utils.metrics import TOTAL_MESSAGES_PRODUCED
 
 cfg = load_config(os.getenv('DOCUMENT_SERVICE_CONFIG_PATH', './configs/app.toml'))
