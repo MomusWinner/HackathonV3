@@ -62,6 +62,21 @@ def process_document_analysis(
 
 # Celery forces doing outer encapsulation
 class AIRemoteDocumentAnalyzer:
-    def analyze(self, document_id: UUID, document_text: str):
-        process_document_analysis.delay(document_id, document_text)
+    def analyze(
+            self,
+            document_id: UUID,
+            document_text: str,
+            show_tags: bool,
+            show_keywords: bool,
+            analyze_images: bool,
+            show_recommendations: bool
+    ):
+        process_document_analysis.delay(
+            document_id,
+            document_text,
+            show_tags,
+            show_keywords,
+            analyze_images,
+            show_recommendations
+        )
         TOTAL_MESSAGES_PRODUCED.inc()
