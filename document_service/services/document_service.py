@@ -9,8 +9,8 @@ from document_service.schemas.document import (
     DocumentResponse,
     ManyDocumentsResponse, TinyDocumentResponse,
 )
-from document_service.utils.pdf_extractor import extract_pdf_content
-
+from document_service.utils.file_content_extractors import extract_pdf_content, extract_pptx_content_with_images, \
+    extract_pptx_text, extract_pdf_text, extract_docx_content_with_images, extract_docx_text
 
 from document_service.tasks.ai_tasks import AIRemoteDocumentAnalyzer
 
@@ -66,14 +66,19 @@ class DocumentService:
 
 
     def _get_document_text(self, file_content: bytes, file_format: str, analyze_images: bool):
+        full_text = ""
         if file_format == 'pdf':
-            if analyze_images:
-                return extract_pdf_content(file_content)
+            full_text = extract_pdf_content(file_content) if analyze_images else extract_pdf_text(file_content)
 
-            with BytesIO(file_content) as pdf_file:  # noqa
-                read_pdf = PyPDF2.PdfReader(pdf_file)
-                full_text = ""
-                for page in read_pdf.pages:
-                    full_text += page.extract_text()
-            return full_text
-        raise NotImplementedError
+        if file_format == 'pptx':
+            full_text = extract_pptx_content_with_images(file_content) if analyze_images else extract_pptx_text(file_content)
+
+        if file_format == "docx":
+            full_text = extract_docx_content_with_images(file_content) if analyze_images else extract_docx_text(file_content)
+
+        print('Extracted:', full_text)
+        if full_text == "":
+            raise NotImplementedError
+
+        return full_text
+
