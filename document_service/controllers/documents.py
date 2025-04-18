@@ -67,7 +67,7 @@ async def receive_analyze(
             await websocket.close()
 
 
-async def send_new_notification_to_user(user_id: str, notification: NotificationResponse):
+async def send_new_notification_to_user(user_id: str, notification: Response):
     if user_id in websocket_connections:
         for websocket in websocket_connections[user_id]:
             await websocket.send_json(notification.model_dump(mode='json'))

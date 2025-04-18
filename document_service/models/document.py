@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import UUID, INTEGER, Column, DateTime, DECIMAL, String, ARRAY
+from sqlalchemy import UUID, Column, DateTime, String, ARRAY
 
 from .base import Base
 
@@ -11,10 +11,9 @@ class Document(Base):
 
     id = Column(UUID, primary_key=True, default=uuid.uuid4)
     user_id = Column(UUID, nullable=False)
-    summary = Column(DECIMAL, nullable=False)
-    recommendations = Column(DECIMAL, nullable=False)
-    processing_status = Column(String, default="in_progress") # in_progress, completed
+    title = Column(String, nullable=True)
+    summary = Column(String, nullable=True)
     tags = Column(ARRAY(String), nullable=True)
-    expediency = Column(INTEGER, nullable=True)
-    balance = Column(DECIMAL, nullable=True)
+    recommendations = Column(String, nullable=True)
+    processing_status = Column(String, default="processing") # processing, completed
     created_at = Column(DateTime, default=datetime.now)
