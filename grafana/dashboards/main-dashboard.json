@@ -86,7 +86,7 @@
         {
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "sum(rate(get_all_transactions_duration_seconds_bucket{instance=\"transaction_service:8000\"}[5m])) by (le)",
+          "expr": "sum(rate(get_all_documents_duration_seconds_bucket{instance=\"document_service:8000\"}[5m])) by (le)",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "legendFormat": "__auto",
@@ -106,7 +106,7 @@
           "refId": "B"
         }
       ],
-      "title": "Get Transactions",
+      "title": "Get documents",
       "type": "histogram"
     },
     {
@@ -174,7 +174,7 @@
         {
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "sum(rate(create_transaction_duration_seconds_bucket{instance=\"transaction_service:8000\"}[5m])) by (gt)",
+          "expr": "sum(rate(create_document_duration_seconds_bucket{instance=\"document_service:8000\"}[5m])) by (gt)",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "legendFormat": "__auto",
@@ -183,7 +183,7 @@
           "useBackend": false
         }
       ],
-      "title": "Create Transaction",
+      "title": "Create document",
       "type": "histogram"
     },
     {
@@ -251,7 +251,7 @@
               "options": {
                 "mode": "exclude",
                 "names": [
-                  "{__name__=\"get_all_transactions_duration_seconds_bucket\", instance=\"transaction_service:8000\", job=\"transaction-service\", le=\"0.005\"}"
+                  "{__name__=\"get_all_documents_duration_seconds_bucket\", instance=\"document_service:8000\", job=\"document-service\", le=\"0.005\"}"
                 ],
                 "prefix": "All except:",
                 "readOnly": true
@@ -290,7 +290,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "sum(increase(http_requests_total{instance=\"transaction_service:8000\"}[1m]))",
+          "expr": "sum(increase(http_requests_total{instance=\"document_service:8000\"}[1m]))",
           "fullMetaSearch": false,
           "includeNullMetadata": false,
           "legendFormat": "__auto",
@@ -305,7 +305,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "get_all_transactions_duration_seconds_count",
+          "expr": "get_all_documents_duration_seconds_count",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -349,7 +349,7 @@
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "Financial Transaction Service",
+  "title": "Financial document Service",
   "uid": "dei024wxgx91ca",
   "version": 6
 }

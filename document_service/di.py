@@ -45,9 +45,9 @@ class DatabaseProvider(Provider):
             yield session
 
 
-class TransactionProvider(Provider):
+class DocumentProvider(Provider):
     @provide(scope=Scope.REQUEST)
-    def get_transaction_gateway(self, session: AsyncSession) -> DocumentRepository:
+    def get_document_db_gateway(self, session: AsyncSession) -> DocumentRepository:
         return DocumentRepository(session)
 
     @provide(scope=Scope.REQUEST)
@@ -55,7 +55,7 @@ class TransactionProvider(Provider):
         return AIRemoteDocumentAnalyzer()
 
     @provide(scope=Scope.REQUEST)
-    def get_transaction_service(
+    def get_document_service(
             self,
             repository: DocumentRepository,
             transaction_analyzer: AIRemoteDocumentAnalyzer,
@@ -67,6 +67,6 @@ def setup_di():
     return make_async_container(
         config_provider(),
         DatabaseProvider(),
-        TransactionProvider(),
+        DocumentProvider(),
         RedisProvider()
     )
