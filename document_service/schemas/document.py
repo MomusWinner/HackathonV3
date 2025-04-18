@@ -13,16 +13,15 @@ class DocumentCreate(BaseModel):
     show_recommendations: bool
 
 
-
 class DocumentResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: UUID4
     user_id: UUID4
-    title: str
-    tags: None | list[str]
-    recommendations: str
-    summary: str
+    title: str | None
+    tags: list[str] | None
+    recommendations: str | None
+    summary: str | None
     processing_status: str
     created_at: datetime
 

@@ -4,7 +4,7 @@ from typing import Annotated
 from uuid import UUID
 
 from dishka import FromDishka
-from dishka.integrations.fastapi import DishkaRoute
+from dishka.integrations.fastapi import DishkaRoute, inject
 from fastapi import APIRouter, HTTPException, status, UploadFile, Form, WebSocket
 from redis.asyncio import Redis
 
@@ -21,10 +21,11 @@ from document_service.utils.metrics import (
 router = APIRouter(route_class=DishkaRoute)
 
 
-@router.post("/documents/", response_model=DocumentResponse)
+@router.post("/documents/")
 @measure_latency(CREATE_DOCUMENT_METHOD_DURATION)
 async def create_documents(
         file: UploadFile,
+        user_id: UUID,
         show_tags: Annotated[bool, Form()],
         show_keywords: Annotated[bool, Form()],
         analyze_images: Annotated[bool, Form()],
@@ -35,6 +36,7 @@ async def create_documents(
     content = await file.read()
     new_document_id = await service.create_document(DocumentCreate(
         content=content,
+        user_id=user_id,
         filename=file.filename,
         show_tags=show_tags,
         show_keywords=show_keywords,
@@ -45,6 +47,7 @@ async def create_documents(
 
 
 @router.websocket("/analyzes/{document_id}")
+@inject
 async def receive_analyze(
         websocket: WebSocket,
         document_id: UUID,

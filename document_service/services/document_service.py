@@ -24,9 +24,11 @@ class DocumentService:
     ) -> DocumentResponse:
         new_document = await self.repository.create(document)
 
+        print('Successfully added to db')
         file_format = document.filename.split('.')[1]
         document_text = self._get_document_text(document.content, file_format)
         print(document_text)
+
         self.financial_category_analyzer.analyze(
             new_document.id,
             document_text,
@@ -36,7 +38,7 @@ class DocumentService:
             document.show_recommendations,
         )
 
-        return DocumentResponse.model_validate(new_document)
+        return new_document.id
 
     async def get_document(self, document_id: UUID) -> Optional[DocumentResponse]:
         document = await self.repository.get(document_id)

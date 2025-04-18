@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
@@ -13,19 +12,19 @@ class DocumentRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def create(self, transaction: DocumentCreate) -> Document:
-        db_transaction = Document(**transaction.model_dump())
-        self.session.add(db_transaction)
+    async def create(self, document: DocumentCreate) -> Document:
+        db_document = Document(user_id=document.user_id)
+        self.session.add(db_document)
         await self.session.commit()
-        await self.session.refresh(db_transaction)
-        return db_transaction
+        await self.session.refresh(db_document)
+        return db_document
 
-    async def save(self, transaction: Document):
-        self.session.add(transaction)
+    async def save(self, document: Document):
+        self.session.add(document)
         await self.session.commit()
 
-    async def create_account_stmt(self, transactions: list):
-        for ts in transactions:
+    async def create_account_stmt(self, documents: list):
+        for ts in documents:
             self.session.add(Document(**ts))
         await self.session.commit()
 
@@ -54,23 +53,23 @@ class DocumentRepository:
         return documents, total
 
     # async def get_all_edited(self):
-    #     stmt = select(EditedTransaction)
+    #     stmt = select(Editeddocument)
     #     res = await self.session.execute(stmt)
     #     return res.scalars().all()
     #
     # async def drop_edited(self):
-    #     stmt = delete(EditedTransaction)
+    #     stmt = delete(Editeddocument)
     #     await self.session.execute(stmt)
     #     await self.session.commit()
     #
-    # async def add_edited(self, transaction: EditedTransaction):
-    #     self.session.add(transaction)
+    # async def add_edited(self, document: Editeddocument):
+    #     self.session.add(document)
     #     await self.session.commit()
 
     async def get_avg_withdrawal_by_category(self, user_id: UUID, category: str):
         res = await self.session.execute(text(
             """
-            select avg(withdraw) from transactions
+            select avg(withdraw) from documents
             where user_id = :user_id and
             category = :cat and 
             entry_date between (now() - interval '1 month') and now()
@@ -83,7 +82,7 @@ class DocumentRepository:
     async def get_avg_withdrawal_by_user(self, user_id: UUID):
         res = await self.session.execute(text(
             """
-            select avg(withdraw) from transactions
+            select avg(withdraw) from documents
             where user_id = :user_id and
             entry_date between (now() - interval '3 month') and now()
             """),
@@ -101,7 +100,7 @@ class DocumentRepository:
     async def get_oldest_ts(self, user_id: UUID):
         res = await self.session.execute(text(
             """
-            select created_at from transactions where user_id=:user_id order by created_at desc limit 1
+            select created_at from documents where user_id=:user_id order by created_at desc limit 1
             """),
             {'user_id': user_id}
         )
@@ -109,29 +108,29 @@ class DocumentRepository:
 
 
     async def update_status(
-        self, transaction_id: UUID, status: str
+        self, document_id: UUID, status: str
     ) -> Optional[Document]:
-        transaction = await self.get(transaction_id)
-        if not transaction:
+        document = await self.get(document_id)
+        if not document:
             return None
-        transaction.processing_status = status
+        document.processing_status = status
         await self.session.commit()
-        await self.session.refresh(transaction)
-        return transaction
+        await self.session.refresh(document)
+        return document
 
     async def update_analysis(
         self,
-        transaction_id: UUID,
+        document_id: UUID,
         category: str,
         expediency: int,
         status: str
     ) -> Optional[Document]:
-        transaction = await self.get(transaction_id)
-        if not transaction:
+        document = await self.get(document_id)
+        if not document:
             return None
-        transaction.category = category
-        transaction.expediency = expediency
-        transaction.processing_status = status
+        document.category = category
+        document.expediency = expediency
+        document.processing_status = status
         await self.session.commit()
-        await self.session.refresh(transaction)
-        return transaction
+        await self.session.refresh(document)
+        return document
