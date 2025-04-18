@@ -1,0 +1,17 @@
+# Your backend secrets
+[db]
+user = "postgres"
+password = "postgres"
+name = "postgres"
+host = "db"
+port = 5432
+
+[redis]
+port = 6379
+host = 'redis'
+
+[rabbitmq]
+user = "guest"
+password = "guest"
+host = "rabbitmq"
+port = 5672
