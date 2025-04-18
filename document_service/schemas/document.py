@@ -1,6 +1,7 @@
+
 from datetime import datetime
 
-from pydantic import UUID4, BaseModel, ConfigDict
+from pydantic import UUID4, BaseModel, ConfigDict, Field
 
 
 class DocumentCreate(BaseModel):
@@ -24,6 +25,8 @@ class DocumentResponse(BaseModel):
     summary: str | None
     processing_status: str
     created_at: datetime
+
+    ws_url: str | None = Field(None)
 
 
 class TinyDocumentResponse(BaseModel):
