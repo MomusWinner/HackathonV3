@@ -47,7 +47,14 @@ def run_async(coro):
 
 
 @celery_app.task
-def process_document_analysis(document_id: UUID, document_text: str):
+def process_document_analysis(
+        document_id: UUID,
+        document_text: str,
+        show_tags: bool,
+        show_keywords: bool,
+        analyze_images: bool,
+        show_recommendations: bool,
+):
     async def inner():
         pass
     return run_async(inner())
