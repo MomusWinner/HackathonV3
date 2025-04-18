@@ -1,6 +1,7 @@
 from typing import Optional
 from uuid import UUID
 from io import BytesIO
+import PyPDF2
 
 from document_service.repositories.document_repository import DocumentRepository
 from document_service.schemas.document import (
@@ -26,8 +27,9 @@ class DocumentService:
 
         print('Successfully added to db')
         file_format = document.filename.split('.')[1]
-        document_text = self._get_document_text(document.content, file_format)
-        print(document_text)
+        document_text = self._get_document_text(
+            document.content, file_format, document.analyze_images
+        )
 
         self.financial_category_analyzer.analyze(
             new_document.id,
@@ -63,8 +65,15 @@ class DocumentService:
         )
 
 
-    def _get_document_text(self, file_content: bytes, file_format: str):
+    def _get_document_text(self, file_content: bytes, file_format: str, analyze_images: bool):
         if file_format == 'pdf':
-            return extract_pdf_content(file_content)
+            if analyze_images:
+                return extract_pdf_content(file_content)
 
+            with BytesIO(file_content) as pdf_file:  # noqa
+                read_pdf = PyPDF2.PdfReader(pdf_file)
+                full_text = ""
+                for page in read_pdf.pages:
+                    full_text += page.extract_text()
+            return full_text
         raise NotImplementedError
