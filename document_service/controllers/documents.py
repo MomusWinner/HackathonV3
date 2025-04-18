@@ -1,13 +1,11 @@
 import asyncio
 from contextlib import suppress
-from datetime import datetime
-from typing import Annotated, Optional
+from typing import Annotated
 from uuid import UUID
 
 from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
 from fastapi import APIRouter, HTTPException, status, UploadFile, Form, WebSocket
-from fastapi.responses import Response
 from redis.asyncio import Redis
 
 from document_service.schemas.document import DocumentCreate, DocumentResponse, \
@@ -25,7 +23,7 @@ router = APIRouter(route_class=DishkaRoute)
 
 @router.post("/documents/", response_model=DocumentResponse)
 @measure_latency(CREATE_DOCUMENT_METHOD_DURATION)
-async def create_transaction(
+async def create_documents(
         file: UploadFile,
         show_tags: Annotated[bool, Form()],
         show_keywords: Annotated[bool, Form()],
@@ -37,6 +35,7 @@ async def create_transaction(
     content = await file.read()
     new_document_id = await service.create_document(DocumentCreate(
         content=content,
+        filename=file.filename,
         show_tags=show_tags,
         show_keywords=show_keywords,
         analyze_images=analyze_images,

@@ -1,10 +1,7 @@
-import uuid
-from datetime import datetime, timedelta
-from typing import List, Optional, Protocol
+from typing import Optional
 from uuid import UUID
 from io import BytesIO
 
-from document_service.models import Document
 from document_service.repositories.document_repository import DocumentRepository
 from document_service.schemas.document import (
     DocumentCreate,
@@ -12,8 +9,7 @@ from document_service.schemas.document import (
     ManyDocumentsResponse, TinyDocumentResponse,
 )
 import PyPDF2
-import re
-from decimal import Decimal
+
 
 from document_service.tasks.ai_tasks import AIRemoteDocumentAnalyzer
 
@@ -27,7 +23,18 @@ class DocumentService:
         self, document: DocumentCreate
     ) -> DocumentResponse:
         new_document = await self.repository.create(document)
-        self.financial_category_analyzer.analyze(new_document.id)
+
+        file_format = document.filename.split('.')[1]
+        document_text = self._get_document_text(document.content, file_format)
+        print(document_text)
+        self.financial_category_analyzer.analyze(
+            new_document.id,
+            document_text,
+            document.show_tags,
+            document.show_keywords,
+            document.analyze_images,
+            document.show_recommendations,
+        )
 
         return DocumentResponse.model_validate(new_document)
 
@@ -36,26 +43,6 @@ class DocumentService:
         if not document:
             return None
         return DocumentResponse.model_validate(document)
-
-    async def process_account_statement(
-        self,
-        user_id: UUID,
-        pdf_file: bytes,
-        bank: Optional[str] = 'tbank',
-    ) -> ManyDocumentsResponse:
-        dict_documents = self._parse_account_stmt(pdf_file, user_id=user_id, bank=bank)
-        await self.repository.create_account_stmt(dict_documents)
-
-        for ts in dict_documents:
-            self.financial_category_analyzer.analyze(ts['id'])
-
-        return ManyDocumentsResponse(
-            total=len(dict_documents),
-            results=reversed(sorted(
-                [DocumentResponse.model_validate(ts) for ts in dict_documents],
-                key=lambda t: t.receipt_date
-            )),
-        )
 
     async def get_documents_by_user_id(
         self,
@@ -74,9 +61,9 @@ class DocumentService:
         )
 
 
-    def _parse_account_stmt(self, pdf_content: bytes, user_id: UUID, format: str):
-        if format == 'pdf':
-            with BytesIO(pdf_content) as pdf_file:  # noqa
+    def _get_document_text(self, file_content: bytes, file_format: str):
+        if file_format == 'pdf':
+            with BytesIO(file_content) as pdf_file:  # noqa
                 read_pdf = PyPDF2.PdfReader(pdf_file)
                 full_text = ""
                 for page in read_pdf.pages:
@@ -84,56 +71,3 @@ class DocumentService:
             return full_text
 
         raise NotImplementedError
-
-    async def get_financial_safety_cushion(self, user_id: UUID) -> tuple[float, float]:
-        avg_withdrawal = await self.repository.get_avg_withdrawal_by_user(user_id)
-        last_balance = await self.repository.get_user_current_balance(user_id)
-        if not (last_balance and avg_withdrawal):
-            return 0, 0
-
-        return last_balance, avg_withdrawal * 3
-
-    #
-    # async def update_ts_category(self, document_id: UUID, category: str):
-    #     ts = await self.repository.get(document_id)
-    #     if ts is None:
-    #         return None
-    #
-    #     ts.category = category
-    #     avg = await self.repository.get_avg_withdrawal_by_category(
-    #         user_id=ts.user_id,
-    #         category=ts.category,
-    #     )
-    #     if (category != 'Salary') and (avg is not None) and avg != 0:
-    #         coef = (ts.withdraw - avg) / avg
-    #         if coef > 20:
-    #             coef = 5
-    #         elif coef > 10:
-    #             coef = 3
-    #         elif coef > 5:
-    #             coef = 2
-    #         else:
-    #             coef = 1
-    #         ts.expediency = coef
-    #
-    #     await self.repository.save(ts)
-    #     await self.repository.add_edited(document=Editeddocument(
-    #         id=ts.id,
-    #         user_id=ts.user_id,
-    #         entry_date =ts.receipt_date,
-    #         receipt_date = ts.receipt_date,
-    #         withdraw=ts.withdraw,
-    #         deposit=ts.deposit,
-    #         created_at=datetime.now(),
-    #         new_category=category,
-    #         balance=ts.balance,
-    #     ))
-    #     self.financial_category_analyzer.fit_model()
-    #     return documentResponse.model_validate(ts)
-
-    @staticmethod
-    def _date_from_str(date_str: str):
-        date_str = date_str.strip()
-        updated_year = '20' + date_str.split('.')[-1]
-        date_str = '.'.join(date_str.split('.')[:2]) + '.' + updated_year
-        return datetime.strptime(date_str, '%d.%m.%Y')

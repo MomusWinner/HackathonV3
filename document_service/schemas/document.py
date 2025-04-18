@@ -4,7 +4,8 @@ from pydantic import UUID4, BaseModel, ConfigDict
 
 
 class DocumentCreate(BaseModel):
-    # user_id: UUID4
+    user_id: UUID4
+    filename: str
     content: bytes
     show_tags: bool
     show_keywords: bool
