@@ -27,6 +27,8 @@ class DocumentResponse(BaseModel):
 
 
 class TinyDocumentResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID4
     processing_status: str
 
