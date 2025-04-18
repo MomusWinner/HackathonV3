@@ -52,7 +52,8 @@ def process_document_analysis(
         prompt: str,
 ):
     async def inner():
-        pass
+        print('Processing document {}'.format(document_id))
+        print('Params:', document_text, show_tags, show_topics, analyze_images, show_recommendations, prompt)
     return run_async(inner())
 
 
@@ -66,7 +67,7 @@ class AIRemoteDocumentAnalyzer:
             show_topics: bool,
             analyze_images: bool,
             show_recommendations: bool,
-            prompt: str
+            prompt: str | None
     ):
         process_document_analysis.delay(
             document_id,

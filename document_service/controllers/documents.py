@@ -40,7 +40,7 @@ async def create_documents(
         user_id=user_id,
         filename=file.filename,
         show_tags=show_tags,
-        show_keywords=show_topics,
+        show_topics=show_topics,
         analyze_images=analyze_images,
         prompt=prompt,
         show_recommendations=show_recommendations,

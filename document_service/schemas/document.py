@@ -11,7 +11,7 @@ class DocumentCreate(BaseModel):
     show_tags: bool
     show_topics: bool
     analyze_images: bool
-    prompt: str
+    prompt: str | None = None
     show_recommendations: bool
 
 
