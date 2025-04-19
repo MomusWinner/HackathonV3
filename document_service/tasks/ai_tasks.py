@@ -98,22 +98,24 @@ def process_document_analysis(
 
         prompt2 = f"""
         <main-prompt>
-        Analyze the provided document-presentation and complete teh following tasks, writing a structured JSON answer the whole text IN THE LANGUAGE OF THE DOCUMENT except foreign terms. Also take into considiration the user suggestions
-        User's additional instruction: {prompt}.
+        Analyze the provided document-presentation and complete teh following tasks, writing a structured JSON answer the whole text IN THE MOST COMMON LANGUAGE OF THE DOCUMENT(if the file is written primarily in English, then use English or Russian or something else) except foreign terms. Also take into considiration the user suggestions
+        User's additional instruction: {prompt}. You must follow them. You need to apply it to all text.
         </main-prompt>
         <tasks>
         - Analysis of structure and content
-        - If the description of the image is related in meaning to the text, then its description can be used
+        - If the description of the image like(=== Page 7 Image ===Image Name: page_7_img_1.png Description:) is related in meaning to the text, you need to write it and if there are different useful graphics, diagrams and tables you must to tell about it  
         - Describe the current structure of the document (sections, subsections, logical blocks).
         - Indicate whether the sequence of slides/sections corresponds to the purpose of the presentation.
+        - Follow the same LANGUAGE
         {'- Formulate 3-5 main tags that the document conveys.' if show_tags else ''}
         - Create a short summary (up to 150 words) that reflects the essence of the presentation.
         - Optimize design and logic
         - Suggest changes to improve the visual design (fonts, graphics, lists).
         - Eliminate contradictions in the narrative, if any.
         - Defining the topic
+        - Follow the same LANGUAGE
         {'- Indicate the main theme of the document and secondary thematic lines (if any).' if show_topics else ''}
-        answer the whole text IN THE LANGUAGE OF THE DOCUMENT except foreign terms
+        continue answering the whole text ON THE SAME LANGUAGE OF THE DOCUMENT except foreign terms.
         {'- Recommendations for improvement' if show_recommendations else ''}
         - Make a list of 3-7 specific edits for the structure (for example: combine slides 5-6, add a section "Use examples", move the "Statistics" block to the beginning).
         - Add a general conclusion.
@@ -121,6 +123,7 @@ def process_document_analysis(
 
         - Clear points with subheadings.
         - Conciseness, use of bulleted lists.
+        - Follow the same LANGUAGE
         {'- All recommendations must be practice-oriented and easy to implement.' if show_recommendations else ''}
         </tasks>
         <json-schema>
