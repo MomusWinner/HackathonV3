@@ -43,10 +43,18 @@ class RabbitmqConfig:
 
 
 @dataclass
+class OpenAIConfig:
+    api_url: str
+    api_key: str
+    gpt_model: str
+
+
+@dataclass
 class Config:
     db: DatabaseConfig
     redis: RedisConfig
     rabbitmq: RabbitmqConfig
+    openapi: OpenAIConfig
 
 
 def load_config(config_path: str) -> Config:
@@ -56,4 +64,5 @@ def load_config(config_path: str) -> Config:
         db=DatabaseConfig(**data["db"]),
         redis=RedisConfig(**data["redis"]),
         rabbitmq=RabbitmqConfig(**data["rabbitmq"]),
+        openapi=OpenAIConfig(**data["openai"])
     )

@@ -121,15 +121,23 @@ class DocumentRepository:
     async def update_analysis(
         self,
         document_id: UUID,
-        category: str,
-        expediency: int,
+        title: str,
+        theme: str,
+        recommendations: str,
+        summary: str,
+        tags: list[str],
+        blocks: list[dict],
         status: str
     ) -> Optional[Document]:
         document = await self.get(document_id)
         if not document:
             return None
-        document.category = category
-        document.expediency = expediency
+        document.title = title
+        document.theme = theme
+        document.recommendations = recommendations
+        document.summary = summary
+        document.tags = tags
+        document.blocks = blocks
         document.processing_status = status
         await self.session.commit()
         await self.session.refresh(document)
