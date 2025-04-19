@@ -114,6 +114,13 @@ services:
         PORT: 3000
     ports:
       - "3020:3000"
+
+  balancer:
+    image: nginx:alpine3.21
+    ports:
+      - 6080:80
+    volumes:
+      - ./nginx:/etc/nginx/templates
 volumes:
   postgres_data:
   redis_data:

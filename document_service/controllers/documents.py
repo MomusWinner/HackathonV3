@@ -49,7 +49,7 @@ async def create_document(
     ))
     return {
         "id": new_document_id,
-        'url': f"ws://localhost:8000/api/v1/analyzes/{new_document_id}"
+        'url': f"ws://localhost:6080/api/v1/analyzes/{new_document_id}"
     }
 
 
@@ -118,7 +118,7 @@ async def get_document(
         service: FromDishka[DocumentService]
 ):
     document = await service.get_document(document_id)
-    document.ws_url = f"ws://localhost:8000/api/v1/analyzes/{document.id}"
+    document.ws_url = f"ws://localhost:6080/api/v1/analyzes/{document.id}"
     if not document:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
     return document
