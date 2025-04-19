@@ -26,7 +26,7 @@ router = APIRouter(route_class=DishkaRoute)
 
 @router.post("/documents/")
 @measure_latency(CREATE_DOCUMENT_METHOD_DURATION)
-async def create_documents(
+async def create_document(
         file: UploadFile,
         user_id: Annotated[str, Form()],
         show_tags: Annotated[bool, Form()],
