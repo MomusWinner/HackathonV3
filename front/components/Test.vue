@@ -14,19 +14,17 @@ import { h } from 'vue'
 import * as z from 'zod'
 
 const formSchema = toTypedSchema(z.object({
-    promt: z.string().min(10).max(100),
+    prompt: z.string().min(10).max(100),
     show_tags: z.boolean().default(false), 
-    recommendation: z.boolean().default(false), 
+    show_recommendations: z.boolean().default(false), 
     analyze_images: z.boolean().default(false), 
-    topics: z.boolean().default(false), 
+    show_topics: z.boolean().default(false), 
     file: z.instanceof(File).refine((file) => file.size < 7000000, {
         message: 'Your resume must be less than 7MB.',
     }),
-    // file: z
-    //   .instanceof(File)
 }))
 
-const { isFieldDirty, handleSubmit } = useForm({
+const { isFieldDirty, handleSubmit} = useForm({
     validationSchema: formSchema,
     initialValues: {
         show_tags: true,
@@ -38,12 +36,24 @@ const { isFieldDirty, handleSubmit } = useForm({
 
 const onSubmit = handleSubmit(async (values) => {
     alert(JSON.stringify(values, null, 2))
+    const formData = new FormData();
+    // Append all form values to FormData
+    Object.entries(values).forEach(([key, value]) => {
+    // Handle both single files and file lists
+    if (value instanceof File || (Array.isArray(value) && value.every(item => item instanceof File))) {
+        if (Array.isArray(value)) {
+            value.forEach(file => formData.append(key, file));
+        } else {
+            formData.append(key, value);
+        }
+    } else {
+        formData.append(key, value);
+    }
+    });
+    formData.append("user_id", "fcd9822a-4049-48ca-974d-3ea8b70a01e3")
     fetch('http://localhost:8000/api/v1/documents/', {
-        body: new FormData(document.querySelector('form')),
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            // "Content-Type": "multipart/form-data",
-        },
+        origin: '*',
+        body: formData,
         method: "post",
     })
     .then(response => {
@@ -55,19 +65,13 @@ const onSubmit = handleSubmit(async (values) => {
     })
     .then(data => console.log(data))
     .catch(error => console.error('Error:', error));
-        // alert(JSON.stringify(values, null, 2))
-
-
-    // if (values.tags !== undefined) {
-    //     alert("sdfkjsdfjl")
-    // }
 })
 
 </script>
 
 <template>
   <form class="w-2/3 space-y-6" @submit="onSubmit">
-    <FormField v-slot="{ componentField }" name="promt" :validate-on-blur="!isFieldDirty">
+    <FormField v-slot="{ componentField }" name="prompt" :validate-on-blur="!isFieldDirty">
       <FormItem>
         <FormLabel>Промт</FormLabel>
         <FormControl>
@@ -101,7 +105,7 @@ const onSubmit = handleSubmit(async (values) => {
       </FormItem>
     </FormField>
 
-    <FormField v-slot="{ value, handleChange }" name="recommendation">
+    <FormField v-slot="{ value, handleChange }" name="show_recommendations">
       <FormItem>
         <FormControl>
             <div class="items-top flex gap-x-2">
@@ -143,7 +147,7 @@ const onSubmit = handleSubmit(async (values) => {
       </FormItem>
     </FormField>
 
-    <FormField v-slot="{ value, handleChange }" name="topics">
+    <FormField v-slot="{ value, handleChange }" name="show_topics">
       <FormItem>
         <FormControl>
             <div class="items-top flex gap-x-2">
