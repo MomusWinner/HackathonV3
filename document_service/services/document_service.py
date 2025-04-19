@@ -27,11 +27,13 @@ class DocumentService:
         new_document = await self.repository.create(document)
 
         print('Successfully added to db')
-        Thread(target=self._parse_doc, args=(new_document, new_document.id)).start()
+        Thread(target=self._parse_doc, args=(document, new_document.id)).start()
 
         return new_document.id
 
-    async def _parse_doc(self, document: DocumentCreate, new_document_id: UUID):
+    def _parse_doc(self, document: DocumentCreate, new_document_id: UUID):
+        print("Starting parsing doc..")
+
         file_format = document.filename.split('.')[1]
         document_text = self._get_document_text(
             document.content, file_format, document.analyze_images
