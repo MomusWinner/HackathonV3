@@ -42,7 +42,7 @@ class DocumentRepository:
     ) -> tuple[list[Document], int]:
         base_query = select(Document).filter(Document.user_id == user_id)
 
-        data_query = base_query.order_by(Document.id.desc()).offset(skip).limit(limit)
+        data_query = base_query.order_by(Document.created_at.desc()).offset(skip).limit(limit)
         data_result = await self.session.execute(data_query)
         documents = list(data_result.scalars().all())
 
