@@ -21,6 +21,7 @@
           packages = with pkgs; [
             nodejs
             nodePackages.prettier
+            typescript-language-server
           ];
         };
       });
