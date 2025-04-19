@@ -24,6 +24,7 @@ class DocumentResponse(BaseModel):
     tags: list[str] | None
     recommendations: str | None
     summary: str | None
+    blocks: list[dict]
     processing_status: str
     created_at: datetime
 
