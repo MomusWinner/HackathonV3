@@ -8,19 +8,23 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 
+import { marked } from 'marked';
 import { toTypedSchema } from "@vee-validate/zod";
 import { useForm } from "vee-validate";
 import { useUserStore } from "@/stores/user";
 import { useDocumentStore } from "@/stores/documents";
+import { Loader2 } from 'lucide-vue-next'
 import { h } from "vue";
 import * as z from "zod";
+
+const loading = ref(false)
 
 const userStore = useUserStore();
 const documentStore = useDocumentStore();
 
 const formSchema = toTypedSchema(
 	z.object({
-		prompt: z.string().min(10).max(100),
+		prompt: z.string().max(100).default(""),
 		show_tags: z.boolean().default(false),
 		show_recommendations: z.boolean().default(false),
 		analyze_images: z.boolean().default(false),
@@ -35,14 +39,13 @@ const { isFieldDirty, handleSubmit } = useForm({
 	validationSchema: formSchema,
 	initialValues: {
 		show_tags: true,
-		recommendation: true,
+		show_recommendations: true,
 		analyze_images: true,
-		topics: true,
+		show_topics: true,
 	},
 });
 
 const onSubmit = handleSubmit(async (values) => {
-	alert(JSON.stringify(values, null, 2));
 	const formData = new FormData();
 	// Append all form values to FormData
 	formData.append("user_id", userStore.getUser());
@@ -61,6 +64,8 @@ const onSubmit = handleSubmit(async (values) => {
 			formData.append(key, value);
 		}
 	});
+
+    loading.value = true
 	const response = await fetch("http://localhost:8000/api/v1/documents/", {
 		origin: "*",
 		body: formData,
@@ -70,6 +75,7 @@ const onSubmit = handleSubmit(async (values) => {
 	let data;
 	if (contentType && contentType.includes("application/json")) {
 		data = await response.json();
+        loading.value = false
 	}
 	// documentStore.setupWebSocketListener(data.ws_url);
 	navigateTo(`/document/${data.id}`);
@@ -77,7 +83,7 @@ const onSubmit = handleSubmit(async (values) => {
 </script>
 
 <template>
-	<form class="w-2/3 space-y-6" @submit="onSubmit">
+	<form class="p-5 space-y-6" @submit="onSubmit">
 		<FormField v-slot="{ value, handleChange }" name="show_tags">
 			<FormItem>
 				<FormControl>
@@ -94,7 +100,6 @@ const onSubmit = handleSubmit(async (values) => {
 							>
 								Теги
 							</label>
-							<p class="text-sm text-muted-foreground">Oписание</p>
 						</div>
 					</div>
 				</FormControl>
@@ -117,7 +122,6 @@ const onSubmit = handleSubmit(async (values) => {
 							>
 								Рекомендации
 							</label>
-							<p class="text-sm text-muted-foreground">Oписание</p>
 						</div>
 					</div>
 				</FormControl>
@@ -140,7 +144,6 @@ const onSubmit = handleSubmit(async (values) => {
 							>
 								Анализ изображений
 							</label>
-							<p class="text-sm text-muted-foreground">Oписание</p>
 						</div>
 					</div>
 				</FormControl>
@@ -163,7 +166,6 @@ const onSubmit = handleSubmit(async (values) => {
 							>
 								Темы
 							</label>
-							<p class="text-sm text-muted-foreground">Oписание</p>
 						</div>
 					</div>
 				</FormControl>
@@ -174,7 +176,6 @@ const onSubmit = handleSubmit(async (values) => {
 			<FormItem>
 				<FormLabel>Файл</FormLabel>
 				<FileUploader :field="componentField" />
-				<FormDescription> Upload your profile picture </FormDescription>
 				<FormMessage />
 			</FormItem>
 		</FormField>
@@ -189,11 +190,16 @@ const onSubmit = handleSubmit(async (values) => {
 				<FormControl>
 					<Textarea placeholder="shadcn" v-bind="componentField" />
 				</FormControl>
-				<FormDescription> This is your public display name. </FormDescription>
+				<!-- <FormDescription> This is your public display name. </FormDescription> -->
 				<FormMessage />
 			</FormItem>
 		</FormField>
 
-		<Button type="submit"> Анализировать </Button>
+        <Button type="submit" :disable="loading">
+             <Loader2 v-if="loading" class="w-4 h-4 mr-2 animate-spin" />
+                Анализировать 
+        </Button>
 	</form>
+
+    <div class="markdown-content" v-html="marked('### 1\n**')"></div>
 </template>
