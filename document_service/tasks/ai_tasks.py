@@ -2,6 +2,7 @@ import asyncio
 import os
 from collections.abc import AsyncGenerator
 from uuid import UUID
+import requests
 
 from celery import Celery
 from dishka import Provider, Scope, make_async_container, provide
@@ -35,6 +36,10 @@ class DatabaseProvider(Provider):
         async with sessionmaker() as session:
             yield session
 
+    @provide(scope=Scope.REQUEST)
+    async def get_doc_repo(self, session: AsyncSession) -> AsyncGenerator[DocumentRepository, None, None]:
+        yield DocumentRepository(session)
+
 
 container = make_async_container(DatabaseProvider())
 
@@ -55,10 +60,9 @@ def process_document_analysis(
 ):
     async def inner():
         print('Processing document {}'.format(document_id))
-        print('Params:', document_text, show_tags, show_topics, analyze_images, show_recommendations, prompt)
 
         headers = {
-            "Authorization": f"Bearer {API_KEY}",
+            "Authorization": f"Bearer {cfg.openapi.api_key}",
             "Content-Type": "application/json"
         }
 
@@ -89,22 +93,22 @@ def process_document_analysis(
         - Conciseness, use of bulleted lists.
         {'- All recommendations must be practice-oriented and easy to implement.' if show_recommendations else ''}
         </tasks>
-    <json-schema>
-    {{
-      "title": "title",
-      "topic": "markdown topics",
-      "summary": "markdown summary"
-      "recommendations": "markdown recommendations",
-      "blocks": [
+        <json-schema>
         {{
-          "title": "block title",
-          "summary": "block markdown summary"
+          "title": "title",
+          "topic": "markdown topics",
+          "summary": "markdown summary"
+          "recommendations": "markdown recommendations",
+          "blocks": [
+            {{
+              "title": "block title",
+              "summary": "block markdown summary"
+            }}
+          ],
+          "tags": ["file tags, one word"]
         }}
-      ],
-      "tags": ["file tags, one word"]
-    }}
-    </json-schema>
-    """
+        </json-schema>
+        """
 
         format = {
             "type": "json_schema",
@@ -162,10 +166,10 @@ def process_document_analysis(
             # "max_tokens": len(text) // 2
         }, {
             "role": "user",
-            "content": extra_promt
+            "content": prompt
         }, {
             "role": "user",
-            "content": text
+            "content": document_text
         }]
 
         payload = {
@@ -173,19 +177,23 @@ def process_document_analysis(
             "messages": messages,
             "response_format": format
         }
+        async with container(scope=Scope.REQUEST) as request_container:
+            try:
+                response = requests.post(
+                    cfg.openapi.api_url,
+                    headers=headers,
+                    json=payload,
+                )
+                results = response.json()['choices'][0]['message']['content']
 
-        try:
-            response = requests.post(
-                cfg.openapi.api_url,
-                headers=headers,
-                json=payload,
-            )
-            results = response.json()['choices'][0]['message']['content']
-        except Exception as e:
-            print(e)
-
-        repo = await container.get(DocumentRepository)
-        await repo.update_analysis(status='completed', **results)
+                repo = await request_container.get(DocumentRepository)
+                await repo.update_analysis(
+                    document_id=document_id, status='completed', **json.loads(results)
+                )
+            except Exception as e:
+                print(e)
+                repo = await request_container.get(DocumentRepository)
+                await repo.update_status(document_id=document_id, status='failed')
 
     return run_async(inner())
 
@@ -198,7 +206,6 @@ class AIRemoteDocumentAnalyzer:
             document_text: str,
             show_tags: bool,
             show_topics: bool,
-            analyze_images: bool,
             show_recommendations: bool,
             prompt: str | None
     ):
@@ -207,7 +214,6 @@ class AIRemoteDocumentAnalyzer:
             document_text,
             show_tags,
             show_topics,
-            analyze_images,
             show_recommendations,
             prompt,
         )

@@ -15,3 +15,8 @@ user = "guest"
 password = "guest"
 host = "rabbitmq"
 port = 5672
+
+[openai]
+api_url = "https://llm.rdfai.ru/api/providers/openai/v1/chat/completions"
+api_key = "9a49054fe339d4bf09f9a35f0d7169e4f4bfacd4bc4b9594406b3348c89d8558"
+gpt_model = "gpt-4o"
