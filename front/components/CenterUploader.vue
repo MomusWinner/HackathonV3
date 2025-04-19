@@ -8,16 +8,15 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 
-import { marked } from 'marked';
 import { toTypedSchema } from "@vee-validate/zod";
 import { useForm } from "vee-validate";
 import { useUserStore } from "@/stores/user";
 import { useDocumentStore } from "@/stores/documents";
-import { Loader2 } from 'lucide-vue-next'
+import { Loader2 } from "lucide-vue-next";
 import { h } from "vue";
 import * as z from "zod";
 
-const loading = ref(false)
+const loading = ref(false);
 
 const userStore = useUserStore();
 const documentStore = useDocumentStore();
@@ -65,7 +64,7 @@ const onSubmit = handleSubmit(async (values) => {
 		}
 	});
 
-    loading.value = true
+	loading.value = true;
 	const response = await fetch("http://localhost:8000/api/v1/documents/", {
 		origin: "*",
 		body: formData,
@@ -75,7 +74,7 @@ const onSubmit = handleSubmit(async (values) => {
 	let data;
 	if (contentType && contentType.includes("application/json")) {
 		data = await response.json();
-        loading.value = false
+		loading.value = false;
 	}
 	// documentStore.setupWebSocketListener(data.ws_url);
 	navigateTo(`/document/${data.id}`);
@@ -195,9 +194,9 @@ const onSubmit = handleSubmit(async (values) => {
 			</FormItem>
 		</FormField>
 
-        <Button type="submit" :disable="loading">
-             <Loader2 v-if="loading" class="w-4 h-4 mr-2 animate-spin" />
-                Анализировать 
-        </Button>
+		<Button type="submit" :disable="loading">
+			<Loader2 v-if="loading" class="w-4 h-4 mr-2 animate-spin" />
+			Анализировать
+		</Button>
 	</form>
 </template>

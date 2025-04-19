@@ -33,6 +33,7 @@
 		"zod": "^3.24.3"
 	},
 	"devDependencies": {
+		"@tailwindcss/typography": "^0.5.16",
 		"prettier": "^3.5.3",
 		"typescript": "^5.8.3",
 		"typescript-language-server": "^4.3.4"

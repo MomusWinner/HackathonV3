@@ -1,5 +1,7 @@
 <script lang="ts" setup>
-const { header } = defineProps<{ header: string }>();
+const { header } = defineProps<{
+	header: string;
+}>();
 </script>
 
 <template>
