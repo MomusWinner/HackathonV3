@@ -33,9 +33,8 @@ async def create_document(
         show_topics: Annotated[bool, Form()],
         analyze_images: Annotated[bool, Form()],
         show_recommendations: Annotated[bool, Form()],
-        prompt: Annotated[str, Form("")],
         service: FromDishka[DocumentService],
-
+        prompt: str = Form(""),
 ):
     content = await file.read()
     new_document_id = await service.create_document(DocumentCreate(
