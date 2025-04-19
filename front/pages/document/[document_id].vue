@@ -23,6 +23,19 @@ onMounted(async () => {
 		<div v-if="document" class="basis-2/4">
 			<CenterDocument :document="document" />
 		</div>
+		<div v-else class="flex flex-col basis-2/4">
+            <Skeleton class="h-[100px] w-150 m-1"/>
+            <div class="flex flex-row">
+                <Skeleton class="h-[40px] w-[70px] m-1"/>
+                <Skeleton class="h-[40px] w-[70px] m-1"/>
+                <Skeleton class="h-[40px] w-[70px] m-1"/>
+            </div>
+            <Skeleton class="h-[50px] w-100 m-1"/>
+            <Skeleton class="h-[250px] w-full m-1"/>
+            <br/>
+            <Skeleton class="h-[50px] w-100 m-1"/>
+            <Skeleton class="h-[250px] w-full m-1"/>
+		</div>
 		<!-- <div class="basis-1/4"></div> -->
 	</div>
 </template>
