@@ -110,8 +110,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.nuxt
+      args:
+        PORT: 3000
     ports:
-      - "8001:8000"
+      - "3020:3000"
 volumes:
   postgres_data:
   redis_data:
