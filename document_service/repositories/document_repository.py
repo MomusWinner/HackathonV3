@@ -122,12 +122,13 @@ class DocumentRepository:
         self,
         document_id: UUID,
         title: str,
-        theme: str,
-        recommendations: str,
         summary: str,
-        tags: list[str],
         blocks: list[dict],
-        status: str
+        status: str,
+        theme: str = None,
+        recommendations: str = None,
+        tags: list[str] = None
+
     ) -> Optional[Document]:
         document = await self.get(document_id)
         if not document:

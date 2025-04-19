@@ -66,6 +66,34 @@ def process_document_analysis(
             "Content-Type": "application/json"
         }
 
+        json_schema = {
+            "title": "title",
+            "theme": "markdown topics",
+            "summary": "markdown summary",
+            "recommendations": "markdown recommendations",
+            "blocks": [
+                {
+                    "title": "block title",
+                    "summary": "block markdown summary"
+                }
+            ],
+            "tags": ["file tags, one word"]
+        }
+
+        required = ["title", "theme", "summary", "recommendations", "tags", "blocks"]
+
+        if not show_tags:
+            del json_schema["tags"]
+            required.remove("tags")
+
+
+        if not show_topics:
+            del json_schema["theme"]
+            required.remove("theme")
+
+        if not show_recommendations:
+            del json_schema["recommendations"]
+            required.remove("recommendations")
 
 
         prompt2 = f"""
@@ -77,7 +105,7 @@ def process_document_analysis(
         - Analysis of structure and content
         - Describe the current structure of the document (sections, subsections, logical blocks).
         - Indicate whether the sequence of slides/sections corresponds to the purpose of the presentation.
-        {'- Formulate 3-5 main tags that the document conveys' if show_tags else ''}.
+        {'- Formulate 3-5 main tags that the document conveys.' if show_tags else ''}
         - Create a short summary (up to 150 words) that reflects the essence of the presentation.
         - Optimize design and logic
         - Suggest changes to improve the visual design (fonts, graphics, lists).
@@ -94,19 +122,7 @@ def process_document_analysis(
         {'- All recommendations must be practice-oriented and easy to implement.' if show_recommendations else ''}
         </tasks>
         <json-schema>
-        {{
-          "title": "title",
-          "topic": "markdown topics",
-          "summary": "markdown summary"
-          "recommendations": "markdown recommendations",
-          "blocks": [
-            {{
-              "title": "block title",
-              "summary": "block markdown summary"
-            }}
-          ],
-          "tags": ["file tags, one word"]
-        }}
+        {json_schema}
         </json-schema>
         """
 
@@ -152,12 +168,23 @@ def process_document_analysis(
                             }
                         }
                     },
-                    "required": ["title", "theme", "summary", "recommendations", "tags", "blocks"],
+                    "required": required,
                     "additionalProperties": False
                 },
                 "strict": True
             }
         }
+
+
+        if not show_tags:
+            del format["json_schema"]["schema"]["properties"]["tags"]
+
+        if not show_recommendations:
+            del format["json_schema"]["schema"]["properties"]["recommendations"]
+
+        if not show_topics:
+            del (format["json_schema"]["schema"]["properties"]["theme"])
+
 
         messages = [{
             "role": "system",
