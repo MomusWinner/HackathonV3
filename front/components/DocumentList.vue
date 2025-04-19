@@ -44,7 +44,17 @@ function goToMain() {
 					"
 					variant="secondary"
 				>
-					{{ document.title }}
+					<span v-if="document.processing_status == 'completed'">
+						{{
+							document.title.length > 30
+								? document.title.slice(0, 30) + "..."
+								: document.title
+						}}
+					</span>
+					<span v-else-if="document.processing_status == 'failed'">
+						Failed :(
+					</span>
+					<span v-else>Processing...</span>
 				</Button>
 			</div>
 		</div>
