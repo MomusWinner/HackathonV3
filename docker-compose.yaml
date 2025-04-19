@@ -106,6 +106,12 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     restart: unless-stopped
 
+  nuxt:
+    build:
+      context: .
+      dockerfile: Dockerfile.nuxt
+    ports:
+      - "8001:8000"
 volumes:
   postgres_data:
   redis_data:
