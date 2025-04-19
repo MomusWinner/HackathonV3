@@ -11,8 +11,6 @@ from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
 
 from document_service.controllers.metrics import router as metrics_router
-from document_service.controllers.middlewares.metrics_middleware import RequestCountMiddleware
-from document_service.controllers.middlewares.rate_limiting_middleware import RateLimitMiddleware
 from document_service.controllers.documents import router as documents_router
 from document_service.di import setup_di
 
@@ -35,15 +33,10 @@ def create_app(ioc_container: AsyncContainer):
 
     application.include_router(documents_router, prefix="/api/v1")
     application.include_router(metrics_router)
-    origins = [
-        "http://localhost:3000",
-        "http://localhost:3001",
-        "http://localhost:8000",
-    ]
 
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=origins,
+        allow_origins=["*"],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
