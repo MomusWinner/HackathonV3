@@ -34,7 +34,7 @@ def create_app(ioc_container: AsyncContainer):
     application.include_router(documents_router, prefix="/api/v1")
     application.include_router(metrics_router)
 
-    app.add_middleware(
+    application.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
         allow_credentials=True,
