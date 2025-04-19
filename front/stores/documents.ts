@@ -56,9 +56,10 @@ export const useDocumentStore = defineStore("document", () => {
 		const socket = new WebSocket(wsUrl);
 		sockets.value[documentId] = socket;
 
-		socket.addEventListener("message", (event) => {
+		socket.addEventListener("message", async (event) => {
 			const data = JSON.parse(event.data);
 			if (data.processing_status === "completed") {
+				await fetchDocumentBriefs();
 				addOrUpdateDocument(data);
 				socket.close();
 				delete sockets.value[documentId];
