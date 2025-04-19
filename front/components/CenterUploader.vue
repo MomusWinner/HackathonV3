@@ -65,7 +65,7 @@ const onSubmit = handleSubmit(async (values) => {
 	});
 
 	loading.value = true;
-	const response = await fetch("http://localhost:8000/api/v1/documents/", {
+	const response = await fetch("/api/v1/documents/", {
 		origin: "*",
 		body: formData,
 		method: "post",

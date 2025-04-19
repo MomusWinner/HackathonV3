@@ -21,7 +21,7 @@ export const useDocumentStore = defineStore("document", () => {
 	async function fetchDocument(id: string) {
 		try {
 			const response = await $fetch<ProcessingResponse>(
-				`http://localhost:8000/api/v1/documents/${id}`,
+				`/api/v1/documents/${id}`,
 			);
 
 			switch (response.processing_status) {
@@ -42,7 +42,7 @@ export const useDocumentStore = defineStore("document", () => {
 		const user = userStore.getUser();
 		try {
 			const response = await $fetch<BriefsResponse>(
-				`http://localhost:8000/api/v1/documents/?user_id=${user}`,
+				`/api/v1/documents/?user_id=${user}`,
 			);
 
 			documentBriefs.value = response.results;
