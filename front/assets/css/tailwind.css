@@ -121,3 +121,18 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer base {
+  h1 {
+    @apply text-xl font-black;
+  }
+  h2 {
+    @apply text-lg font-bold;
+  }
+  h3 {
+    @apply text-lg font-bold;
+  }
+  h4 {
+    @apply text-lg font-bold;
+  }
+}
