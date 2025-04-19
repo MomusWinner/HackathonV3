@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 const { document } = defineProps<{ document: Document }>();
+import { marked } from 'marked';
 // const document = {
 // 	title: "Fimzo",
 // 	tags: ["chicken", "jockey"],
@@ -24,14 +25,15 @@ const { document } = defineProps<{ document: Document }>();
 		<div class="text-6xl">{{ document.title }}</div>
 		<div v-if="document.theme">{{ document.theme }}</div>
 		<DocumentTags v-if="document.tags" :tags="document.tags" />
-		<Headered v-if="document.summary" header="Краткое содержание">
-			{{ document.summary }}
-		</Headered>
+		<Headered v-if="document.summary" header="Краткое содержание" >
+            <p v-html="marked(document.summary)"></p>
+        </Headered>
+
 		<Headered
 			v-if="document.recommendations"
 			header="Рекомендации по улучшению"
 		>
-			{{ document.recommendations }}
+            <p v-html="marked(document.recommendations)"></p>
 		</Headered>
 		<div class="text-2xl font-medium">Смысловые блоки</div>
 		<Blocks v-if="document.blocks" :blocks="document.blocks" />
