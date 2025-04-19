@@ -33,7 +33,7 @@ async def create_document(
         show_topics: Annotated[bool, Form()],
         analyze_images: Annotated[bool, Form()],
         show_recommendations: Annotated[bool, Form()],
-        prompt: Annotated[str, Form()],
+        prompt: Annotated[str, Form("")],
         service: FromDishka[DocumentService],
 
 ):
