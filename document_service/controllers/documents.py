@@ -48,7 +48,10 @@ async def create_documents(
         prompt=prompt,
         show_recommendations=show_recommendations,
     ))
-    return {'url': f"ws://localhost:8000/api/v1/analyzes/{new_document_id}"}
+    return {
+        "id": new_document_id,
+        'url': f"ws://localhost:8000/api/v1/analyzes/{new_document_id}"
+    }
 
 
 @router.websocket("/analyzes/{document_id}")
