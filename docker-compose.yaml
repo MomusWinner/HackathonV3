@@ -121,6 +121,11 @@ services:
       - 6080:80
     volumes:
       - ./nginx:/etc/nginx/templates
+    depends_on:
+      nuxt:
+        condition: service_started
+      document_service:
+        condition: service_started
 volumes:
   postgres_data:
   redis_data:
