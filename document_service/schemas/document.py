@@ -21,6 +21,7 @@ class DocumentResponse(BaseModel):
     id: UUID4
     user_id: UUID4
     title: str | None
+    theme: str | None
     tags: list[str] | None
     recommendations: str | None
     summary: str | None
