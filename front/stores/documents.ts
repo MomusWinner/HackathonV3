@@ -9,7 +9,7 @@ type WsResponse = {
 type ProcessingResponse = WsResponse | Document;
 
 type BriefsResponse = {
-	result: DocumentBrief[];
+	results: DocumentBrief[];
 };
 
 export const useDocumentStore = defineStore("document", () => {
@@ -27,10 +27,10 @@ export const useDocumentStore = defineStore("document", () => {
 			switch (response.processing_status) {
 				case "processing":
 					setupWebSocketListener(id, (response as WsResponse).ws_url);
+					break;
 				case "completed":
 					addOrUpdateDocument(response as Document);
-				default:
-					throw new Error("Aaa");
+					break;
 			}
 		} catch (error) {
 			console.error("Error fetching document:", error);
@@ -45,9 +45,7 @@ export const useDocumentStore = defineStore("document", () => {
 				`http://localhost:8000/api/v1/documents/?user_id=${user}`,
 			);
 
-			for (const brief of response.result) {
-				addOrUpdateDocumentBrief(brief);
-			}
+			documentBriefs.value = response.results;
 		} catch (error) {
 			console.error("Error fetching document:", error);
 			throw error;
@@ -60,8 +58,8 @@ export const useDocumentStore = defineStore("document", () => {
 
 		socket.addEventListener("message", (event) => {
 			const data = JSON.parse(event.data);
-			if (data.status === "completed") {
-				addOrUpdateDocument(data.document);
+			if (data.processing_status === "completed") {
+				addOrUpdateDocument(data);
 				socket.close();
 				delete sockets.value[documentId];
 			}
@@ -94,6 +92,10 @@ export const useDocumentStore = defineStore("document", () => {
 		return documents.value.find((d) => d.id === id);
 	}
 
+	function getBriefs(): DocumentBrief[] {
+		return documentBriefs.value;
+	}
+
 	function cleanupWebSockets() {
 		Object.values(sockets.value).forEach((socket) => socket.close());
 		sockets.value = {};
@@ -105,6 +107,7 @@ export const useDocumentStore = defineStore("document", () => {
 		fetchDocumentBriefs,
 		fetchDocument,
 		getDocument,
+		getBriefs,
 		cleanupWebSockets,
 	};
 });
