@@ -1,5 +1,4 @@
 <template>
-  <Card>
     <div 
       class="border-2 border-dashed rounded-lg p-8 text-center transition-colors"
       :class="{
@@ -15,10 +14,13 @@
         ref="fileInput"
         type="file"
         class="hidden"
-        multiple
-        @change="onFileSelect"
+        accept=".docx,.pdf,.pptx"
+        v-bind="field"
+        @change="(e)=>{
+            onFileSelect(e)
+            field.onChange(e.target.files?.[0] || null)
+        }"
       />
-
       <div class="flex flex-col items-center gap-4">
         <CloudUploadIcon class="h-8 w-8 text-gray-500" />
         <div>
@@ -58,7 +60,6 @@
     <div v-if="error" class="mt-4 text-sm text-destructive">
       {{ error }}
     </div>
-  </Card>
 </template>
 
 <script setup>
@@ -72,7 +73,10 @@ const props = defineProps({
   maxSizeMB: {
     type: Number,
     default: 50
-  }
+  },
+    field: {
+        type: Object,
+    }
 })
 
 const emit = defineEmits(['files-selected'])

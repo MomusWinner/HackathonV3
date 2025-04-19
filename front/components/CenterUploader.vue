@@ -71,19 +71,6 @@ const onSubmit = handleSubmit(async (values) => {
 
 <template>
   <form class="w-2/3 space-y-6" @submit="onSubmit">
-    <FormField v-slot="{ componentField }" name="prompt" :validate-on-blur="!isFieldDirty">
-      <FormItem>
-        <FormLabel>Промт</FormLabel>
-        <FormControl>
-          <Textarea placeholder="shadcn" v-bind="componentField" />
-        </FormControl>
-        <FormDescription>
-          This is your public display name.
-        </FormDescription>
-        <FormMessage />
-      </FormItem>
-    </FormField>
-
     <FormField v-slot="{ value, handleChange }" name="show_tags">
       <FormItem>
         <FormControl>
@@ -168,14 +155,11 @@ const onSubmit = handleSubmit(async (values) => {
       </FormItem>
     </FormField>
 
+
     <FormField v-slot="{ componentField }" name="file">
         <FormItem>
-          <FormLabel>Picture</FormLabel>
-          <Input
-            type="file"
-            v-bind="componentField"
-            @change="componentField.onChange($event.target.files?.[0] || null)"
-          />
+          <FormLabel>Файл</FormLabel>
+            <FileUploader :field="componentField"  />
           <FormDescription>
             Upload your profile picture
           </FormDescription>
@@ -183,38 +167,19 @@ const onSubmit = handleSubmit(async (values) => {
         </FormItem>
     </FormField>
 
+    <FormField v-slot="{ componentField }" name="prompt" :validate-on-blur="!isFieldDirty">
+      <FormItem>
+        <FormLabel>Промт</FormLabel>
+        <FormControl>
+          <Textarea placeholder="shadcn" v-bind="componentField" />
+        </FormControl>
+        <FormDescription>
+          This is your public display name.
+        </FormDescription>
+        <FormMessage />
+      </FormItem>
+    </FormField>
 
-
-
-    <!-- <FormField -->
-    <!--   control={form.control} -->
-    <!--   name="picture" -->
-    <!--   render={({ field: { value, onChange, ...fieldProps } }) => ( -->
-    <!--     <FormItem> -->
-    <!--       <FormLabel>Picture</FormLabel> -->
-    <!--       <FormControl> -->
-    <!--         <Input -->
-    <!--           {...fieldProps} -->
-    <!--           placeholder="Picture" -->
-    <!--           type="file" -->
-    <!--           accept="image/*, application/pdf" -->
-    <!--           onChange={(event) => -->
-    <!--             onChange(event.target.files && event.target.files[0]) -->
-    <!--           } -->
-    <!--         /> -->
-    <!--       </FormControl> -->
-    <!--       <FormMessage /> -->
-    <!--     </FormItem> -->
-    <!--   )} -->
-    <!-- /> -->
-
-    <!-- <FormField v-slot="{ componentField }" name="file" :validate-on-blur="!isFieldDirty"> -->
-    <!--   <FormItem> -->
-    <!--     <FormControl> -->
-    <!--         <FileUploader v-bind="componentField" class="w-full"/> -->
-    <!--     </FormControl> -->
-    <!--   </FormItem> -->
-    <!-- </FormField> -->
     <Button type="submit">
     Анализировать
     </Button>
