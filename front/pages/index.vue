@@ -4,8 +4,7 @@
 			<DocumentList />
 		</div>
 		<div class="basis-2/4">
-            <!-- <CenterUploader /> -->
-            <Test />
+            <CenterUploader />
         </div>
 		<div class="basis-1/4">
             <SettingForm />

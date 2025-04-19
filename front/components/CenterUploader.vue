@@ -1,109 +1,222 @@
-<script setup>
-    // import { toTypedSchema } from '@vee-validate/zod'
-    // import { useForm } from 'vee-validate'
-    // import * as z from 'zod'
-    //
-    // const formSchema = toTypedSchema(z.object({
-    //   username: z.string().min(2).max(50),
-    // }))
-    // const form = useForm({
-    //   validationSchema: formSchema,
-    // })
-    //
-    // const onSubmit = form.handleSubmit((values) => {
-    //   console.log('Form submitted!', values)
-    // })
-    //
-    // const test = function () {
-    //     console.log("test")
-    //     alert("test")
-    //
-    // }
+<script setup lang="ts">
+import {
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
 
-    const onSubmit = function(v) {
-        alert(JSON.stringify(v))
+import { toTypedSchema } from '@vee-validate/zod'
+import { useForm } from 'vee-validate'
+import { h } from 'vue'
+import * as z from 'zod'
+
+const formSchema = toTypedSchema(z.object({
+    prompt: z.string().min(10).max(100),
+    show_tags: z.boolean().default(false), 
+    show_recommendations: z.boolean().default(false), 
+    analyze_images: z.boolean().default(false), 
+    show_topics: z.boolean().default(false), 
+    file: z.instanceof(File).refine((file) => file.size < 7000000, {
+        message: 'Your resume must be less than 7MB.',
+    }),
+}))
+
+const { isFieldDirty, handleSubmit} = useForm({
+    validationSchema: formSchema,
+    initialValues: {
+        show_tags: true,
+        recommendation: true,
+        analyze_images: true,
+        topics: true,
+    },
+})
+
+const onSubmit = handleSubmit(async (values) => {
+    alert(JSON.stringify(values, null, 2))
+    const formData = new FormData();
+    // Append all form values to FormData
+    Object.entries(values).forEach(([key, value]) => {
+    // Handle both single files and file lists
+    if (value instanceof File || (Array.isArray(value) && value.every(item => item instanceof File))) {
+        if (Array.isArray(value)) {
+            value.forEach(file => formData.append(key, file));
+        } else {
+            formData.append(key, value);
+        }
+    } else {
+        formData.append(key, value);
     }
+    });
+    formData.append("user_id", "fcd9822a-4049-48ca-974d-3ea8b70a01e3")
+    fetch('http://localhost:8000/api/v1/documents/', {
+        origin: '*',
+        body: formData,
+        method: "post",
+    })
+    .then(response => {
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            return response.json();
+        }
+        throw new TypeError("Oops, we haven't got JSON!");
+    })
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+})
+
 </script>
 
 <template>
-    <div class="flex flex-col items-center min-h-screen p-5">
-        <Form @submit="onSubmit" class="flex flex-col items-center min-h-screen p-5">
-            <!-- <FormField  v-slot="{ componentField }" name="tag"> -->
-            <!-- <FormField> -->
-            <!--     <FormItem> -->
-            <!--         <div class="items-top flex gap-x-2"> -->
-            <!--             <Checkbox id="terms1" /> -->
-            <!--             <div class="grid gap-1.5 leading-none"> -->
-            <!--                 <label -->
-            <!--                   for="terms1" -->
-            <!--                   class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" -->
-            <!--                 > -->
-            <!--                 Теги -->
-            <!--                 </label> -->
-            <!--                 <p class="text-sm text-muted-foreground"> -->
-            <!--                 Oписание -->
-            <!--                 </p> -->
-            <!--             </div> -->
-            <!--         </div> -->
-            <!--     </FormItem> -->
-            <!-- </FormField> -->
-            <!---->
-            <!-- <FormField> -->
-            <!--     <FormItem> -->
-            <!--         <div class="items-top flex gap-x-2"> -->
-            <!--             <Checkbox id="terms1" /> -->
-            <!--             <div class="grid gap-1.5 leading-none"> -->
-            <!--                 <label -->
-            <!--                   for="terms1" -->
-            <!--                   class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" -->
-            <!--                 > -->
-            <!--                 Анализ изображения -->
-            <!--                 </label> -->
-            <!--                 <p class="text-sm text-muted-foreground"> -->
-            <!--                 Oписание -->
-            <!--                 </p> -->
-            <!--             </div> -->
-            <!--         </div> -->
-            <!--     </FormItem> -->
-            <!-- </FormField> -->
-            <!---->
-            <!-- <FormField> -->
-            <!--     <FormItem> -->
-            <!--         <div class="items-top flex gap-x-2"> -->
-            <!--             <Checkbox id="terms1" /> -->
-            <!--             <div class="grid gap-1.5 leading-none"> -->
-            <!--                 <label -->
-            <!--                   for="terms1" -->
-            <!--                   class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" -->
-            <!--                 > -->
-            <!--                 Рекомендации -->
-            <!--                 </label> -->
-            <!--                 <p class="text-sm text-muted-foreground"> -->
-            <!--                 Oписание -->
-            <!--                 </p> -->
-            <!--             </div> -->
-            <!--         </div> -->
-            <!--     </FormItem> -->
-            <!-- </FormField> -->
-            <!-- <br> -->
+  <form class="w-2/3 space-y-6" @submit="onSubmit">
+    <FormField v-slot="{ componentField }" name="prompt" :validate-on-blur="!isFieldDirty">
+      <FormItem>
+        <FormLabel>Промт</FormLabel>
+        <FormControl>
+          <Textarea placeholder="shadcn" v-bind="componentField" />
+        </FormControl>
+        <FormDescription>
+          This is your public display name.
+        </FormDescription>
+        <FormMessage />
+      </FormItem>
+    </FormField>
 
-            <FormField name="username">
-                <FormItem>
-                    <FormLabel>Промпт</FormLabel>
-                    <FormControl>
-                        <Textarea class="w-full" placeholder="Type your message here."/>
-                    </FormControl>
-                </FormItem>
-                <FormMessage />
-            </FormField>
-            <br>
-            <!-- <FormField> -->
-            <!--     <FormItem> -->
-            <!--         <FileUploader class="w-full"/> -->
-            <!--     </FormItem> -->
-            <!-- </FormField> -->
-            <!-- <div class="h-10"></div> -->
-            <Button type="submit" class="mx-auto">Анализировать</Button>
-        </Form>
-    </div>
+    <FormField v-slot="{ value, handleChange }" name="show_tags">
+      <FormItem>
+        <FormControl>
+            <div class="items-top flex gap-x-2">
+                <Checkbox id="terms1" :model-value="value" @update:model-value="handleChange"/>
+                <div class="grid gap-1.5 leading-none">
+                    <label
+                      for="terms1"
+                      class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                    Теги
+                    </label>
+                    <p class="text-sm text-muted-foreground">
+                    Oписание
+                    </p>
+                </div>
+            </div>
+        </FormControl>
+      </FormItem>
+    </FormField>
+
+    <FormField v-slot="{ value, handleChange }" name="show_recommendations">
+      <FormItem>
+        <FormControl>
+            <div class="items-top flex gap-x-2">
+                <Checkbox id="terms1" :model-value="value" @update:model-value="handleChange"/>
+                <div class="grid gap-1.5 leading-none">
+                    <label
+                      for="terms1"
+                      class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                    Рекомендации
+                    </label>
+                    <p class="text-sm text-muted-foreground">
+                    Oписание
+                    </p>
+                </div>
+            </div>
+        </FormControl>
+      </FormItem>
+    </FormField>
+
+    <FormField v-slot="{ value, handleChange }" name="analyze_images">
+      <FormItem>
+        <FormControl>
+            <div class="items-top flex gap-x-2">
+                <Checkbox id="terms1" :model-value="value" @update:model-value="handleChange"/>
+                <div class="grid gap-1.5 leading-none">
+                    <label
+                      for="terms1"
+                      class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                    Анализ изображений
+                    </label>
+                    <p class="text-sm text-muted-foreground">
+                    Oписание
+                    </p>
+                </div>
+            </div>
+        </FormControl>
+      </FormItem>
+    </FormField>
+
+    <FormField v-slot="{ value, handleChange }" name="show_topics">
+      <FormItem>
+        <FormControl>
+            <div class="items-top flex gap-x-2">
+                <Checkbox id="terms1" :model-value="value" @update:model-value="handleChange"/>
+                <div class="grid gap-1.5 leading-none">
+                    <label
+                      for="terms1"
+                      class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                    Темы
+                    </label>
+                    <p class="text-sm text-muted-foreground">
+                    Oписание
+                    </p>
+                </div>
+            </div>
+        </FormControl>
+      </FormItem>
+    </FormField>
+
+    <FormField v-slot="{ componentField }" name="file">
+        <FormItem>
+          <FormLabel>Picture</FormLabel>
+          <Input
+            type="file"
+            v-bind="componentField"
+            @change="componentField.onChange($event.target.files?.[0] || null)"
+          />
+          <FormDescription>
+            Upload your profile picture
+          </FormDescription>
+          <FormMessage />
+        </FormItem>
+    </FormField>
+
+
+
+
+    <!-- <FormField -->
+    <!--   control={form.control} -->
+    <!--   name="picture" -->
+    <!--   render={({ field: { value, onChange, ...fieldProps } }) => ( -->
+    <!--     <FormItem> -->
+    <!--       <FormLabel>Picture</FormLabel> -->
+    <!--       <FormControl> -->
+    <!--         <Input -->
+    <!--           {...fieldProps} -->
+    <!--           placeholder="Picture" -->
+    <!--           type="file" -->
+    <!--           accept="image/*, application/pdf" -->
+    <!--           onChange={(event) => -->
+    <!--             onChange(event.target.files && event.target.files[0]) -->
+    <!--           } -->
+    <!--         /> -->
+    <!--       </FormControl> -->
+    <!--       <FormMessage /> -->
+    <!--     </FormItem> -->
+    <!--   )} -->
+    <!-- /> -->
+
+    <!-- <FormField v-slot="{ componentField }" name="file" :validate-on-blur="!isFieldDirty"> -->
+    <!--   <FormItem> -->
+    <!--     <FormControl> -->
+    <!--         <FileUploader v-bind="componentField" class="w-full"/> -->
+    <!--     </FormControl> -->
+    <!--   </FormItem> -->
+    <!-- </FormField> -->
+    <Button type="submit">
+    Анализировать
+    </Button>
+  </form>
 </template>
