@@ -186,9 +186,9 @@ const onSubmit = handleSubmit(async (values) => {
 			:validate-on-blur="!isFieldDirty"
 		>
 			<FormItem>
-				<FormLabel>Промт</FormLabel>
+				<FormLabel>Пожелания</FormLabel>
 				<FormControl>
-					<Textarea placeholder="shadcn" v-bind="componentField" />
+					<Textarea placeholder="Повеселее" v-bind="componentField" />
 				</FormControl>
 				<!-- <FormDescription> This is your public display name. </FormDescription> -->
 				<FormMessage />
