@@ -36,6 +36,7 @@ class TinyDocumentResponse(BaseModel):
 
     id: UUID4
     processing_status: str
+    title: str | None
 
 
 class ManyDocumentsResponse(BaseModel):
